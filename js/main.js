@@ -21,7 +21,24 @@ function initialize() {
           alert("Could not find location: " + location);
       }
   });
+  $.getJSON("data/stores.json", function(json) {
+    console.log(json); // this will show the info it in firebug console
+});
+  marker = new google.maps.Marker({
+      map: map,
+      draggable: true,
+      animation: google.maps.Animation.DROP,
+      position: {lat: -33.8688, lng: 151.2093}
+    });
+    marker.addListener('click', toggleBounce);
+  }
 
+  function toggleBounce() {
+    if (marker.getAnimation() !== null) {
+      marker.setAnimation(null);
+    } else {
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+    }
 
   // Create a <script> tag and set the USGS URL as the source.
   var script = document.createElement('script');
