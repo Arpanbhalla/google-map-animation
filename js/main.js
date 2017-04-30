@@ -1,17 +1,28 @@
-
-var country = "Australia";
 var geocoder;
+var mapCentre;
 var map;
-function initMap() {
-  map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 5,
-    mapTypeId: 'terrain'
+
+function initialize() {
+
+  var country = "Australia"
+
+  var myOptions = {
+      zoom: 5,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+
+  var map = new google.maps.Map(document.getElementById("map"),myOptions);
+
+  var geocoder = new google.maps.Geocoder();
+  geocoder.geocode( { 'address': country }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+          map.setCenter(results[0].geometry.location);
+      } else {
+          alert("Could not find location: " + location);
+      }
   });
-  geocoder.geocode( {'address' : country}, function(results, status) {
-    if (status == google.maps.GeocoderStatus.OK) {
-        map.setCenter(results[0].geometry.location);
-    }
-  });
+
+
   // Create a <script> tag and set the USGS URL as the source.
   var script = document.createElement('script');
   // This example uses a local copy of the GeoJSON stored at
