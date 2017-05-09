@@ -1,62 +1,52 @@
 var geocoder;
 var mapCentre;
 var map;
+var coordinates = [];
+// var marker_icon = 'http://maps.google.com/mapfiles/kml/shapes/gas_stations.png';
 
 function initialize() {
 
-  var country = "Australia"
+  // Centre the map to Australia
+        var country = "Australia";
+        var myOptions = {
+          zoom: 4,
+          mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        var map = new google.maps.Map(document.getElementById("map"), myOptions);
+        // new google.maps.Geocoder(); => Converts location to lat /long
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'address': country }, function (results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            map.setCenter(results[0].geometry.location);
+          } else {
+            alert("Could not find location: " + location);
+          }
+        });
 
-  var myOptions = {
-      zoom: 5,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
+  // Read from data input type json
+  $.getJSON("http://localhost:3000/data/stores.json", function (stores) {
 
-  var map = new google.maps.Map(document.getElementById("map"),myOptions);
+    // loop all the markers
+    $.each(stores, function (i, store_detail) {
 
-  var geocoder = new google.maps.Geocoder();
-  geocoder.geocode( { 'address': country }, function(results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-          map.setCenter(results[0].geometry.location);
-      } else {
-          alert("Could not find location: " + location);
-      }
+      // add marker to map
+      console.log(store_detail);
+      lat = store_detail.Latitude;
+      lng = store_detail.Longitude;
+      var latLng = new google.maps.LatLng(lat, lng);
+      coordinates.push(latLng);
+    });
   });
-  $.getJSON("data/stores.json", function(json) {
-    console.log(json); // this will show the info it in firebug console
-});
-  marker = new google.maps.Marker({
-      map: map,
-      draggable: true,
-      animation: google.maps.Animation.DROP,
-      position: {lat: -33.8688, lng: 151.2093}
-    });
-    marker.addListener('click', toggleBounce);
-  }
-
-  function toggleBounce() {
-    if (marker.getAnimation() !== null) {
-      marker.setAnimation(null);
-    } else {
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-    }
-
-  // Create a <script> tag and set the USGS URL as the source.
-  var script = document.createElement('script');
-  // This example uses a local copy of the GeoJSON stored at
-  // http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp
-  script.src = 'https://developers.google.com/maps/documentation/javascript/examples/json/earthquake_GeoJSONP.js';
-  document.getElementsByTagName('head')[0].appendChild(script);
-}
-
-// Loop through the results array and place a marker for each
-// set of coordinates.
-window.eqfeed_callback = function(results) {
-  for (var i = 0; i < results.features.length; i++) {
-    var coords = results.features[i].geometry.coordinates;
-    var latLng = new google.maps.LatLng(coords[1],coords[0]);
+  var i = 0;
+  var interval = setInterval(function () {
     var marker = new google.maps.Marker({
-      position: latLng,
-      map: map
+        map: map,
+        draggable: false,
+        // icon:  marker_icon,
+        animation: google.maps.Animation.DROP,
+        position: coordinates[i]
     });
-  }
+    i++;
+    if (i >= coordinates.length) clearInterval(interval);
+  }, 10);
 }
